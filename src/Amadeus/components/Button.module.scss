@@ -1,0 +1,13 @@
+@import '../colors.scss';
+
+.button {
+  background-color: transparent;
+  border: 1px solid $bg-color;
+  border-radius: 12px;
+  box-shadow: 0 0 3px 1px $fg-color;
+  cursor: pointer;
+  padding: 4px 24px;
+  &:active {
+    box-shadow: 1px 1px 5px -1px $fg-color;
+  }
+}

@@ -1,0 +1,38 @@
+.sidebar {
+  height: 100%;
+  width: 280px;
+  padding: 7px;
+}
+
+.item {
+  cursor: pointer;
+  font-size: 18px;
+  align-items: center;
+  flex-direction: row;
+  padding: 12px;
+  position: relative;
+  z-index: 1;
+  &:hover::before {
+    background-image: url(./assets/nixie-tube.webp);
+    background-position: 0 30%;
+    background-size: 100% 180%;
+    content: '';
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    opacity: 0.6;
+    z-index: -1;
+  }
+
+  .gap {
+    width: 8px;
+  }
+}
+
+.chatList {
+  flex-grow: 1;
+}
+
+.settings {
+  flex-shrink: 0;
+}

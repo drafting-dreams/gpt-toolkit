@@ -1,0 +1,15 @@
+@import '../colors.scss';
+
+.container {
+  position: relative;
+  z-index: 1;
+}
+.icon {
+  fill: $fg-color;
+}
+.shadowIcon {
+  fill: $bg-color;
+  position: absolute;
+  transform: scale(1.15);
+  z-index: -1;
+}

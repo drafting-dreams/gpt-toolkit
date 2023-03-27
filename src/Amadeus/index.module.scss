@@ -1,0 +1,21 @@
+@import './colors.scss';
+
+.amadeus {
+  background-color: black;
+  flex-direction: row;
+  height: 100vh;
+
+  * {
+    color: $fg-color;
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    font-weight: 100;
+    text-shadow: $bg-color 1px 1px 1px, $bg-color -1px -1px 1px,
+      $bg-color 1px -1px 1px, $bg-color -1px 1px 1px;
+  }
+}
+
+.settingsButton {
+  position: fixed;
+  bottom: 25px;
+  left: 25px;
+}
