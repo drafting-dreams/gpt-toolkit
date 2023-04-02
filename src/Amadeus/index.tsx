@@ -5,10 +5,15 @@ import Button from './components/Button'
 
 import classes from './index.module.scss'
 
+const SHOW_SIDEBAR = 'show-sidebar'
+
 function Amadeus() {
-  const [showSidebar, setShowSideBar] = useState(false)
+  const [showSidebar, setShowSideBar] = useState(
+    localStorage.getItem(SHOW_SIDEBAR) === '1' ? true : false,
+  )
   const hideSideBar = useCallback(() => {
     setShowSideBar(false)
+    localStorage.setItem(SHOW_SIDEBAR, '0')
   }, [])
 
   return (
@@ -20,6 +25,7 @@ function Amadeus() {
           className={classes.settingsButton}
           onClick={() => {
             setShowSideBar(true)
+            localStorage.setItem(SHOW_SIDEBAR, '1')
           }}
         >
           Menu
