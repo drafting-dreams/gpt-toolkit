@@ -11,6 +11,9 @@
     font-weight: 100;
     text-shadow: $bg-color 1px 1px 1px, $bg-color -1px -1px 1px,
       $bg-color 1px -1px 1px, $bg-color -1px 1px 1px;
+    &:focus {
+      outline: none;
+    }
   }
 }
 

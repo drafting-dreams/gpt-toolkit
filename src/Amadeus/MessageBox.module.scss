@@ -1,0 +1,28 @@
+.messageBox {
+  padding: 12px 0;
+  flex-direction: row;
+  img {
+    height: 45px;
+    width: 45px;
+    &.hidden {
+      opacity: 0;
+    }
+  }
+}
+
+.message {
+  padding: 16px 0;
+}
+.textAlignLeft {
+  margin-right: auto;
+}
+.textAlignRight {
+  margin-left: auto;
+}
+
+.kurisuAvatar {
+  margin-right: 20px;
+}
+.rintaroAvatar {
+  margin-left: 20px;
+}

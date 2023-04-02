@@ -12,7 +12,7 @@ function Amadeus() {
   }, [])
 
   return (
-    <div className={classes.amadeus}>
+    <div id='amadeus' className={classes.amadeus}>
       {showSidebar && <Sidebar onClose={hideSideBar} />}
       <ChatWindow />
       {!showSidebar && (

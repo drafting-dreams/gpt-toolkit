@@ -1,4 +1,9 @@
+@import './colors.scss';
+
 .sidebar {
+  border-right: 1px solid $bg-color-transparent;
+  box-shadow: 0 0 3px -1px $fg-color;
+  flex-shrink: 0;
   height: 100%;
   width: 280px;
   padding: 7px;
@@ -9,12 +14,13 @@
   font-size: 18px;
   align-items: center;
   flex-direction: row;
+  overflow: hidden;
   padding: 12px;
   position: relative;
   z-index: 1;
   &:hover::before {
     background-image: url(./assets/nixie-tube.webp);
-    background-position: 0 30%;
+    background-position: -5px 30%;
     background-size: 100% 180%;
     content: '';
     position: absolute;
