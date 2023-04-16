@@ -1,4 +1,5 @@
-import { useRef, useState } from 'react'
+import { useContext, useRef, useState } from 'react'
+import { SettingsModalContext } from './SettingsModal'
 import classes from './ChatWindow.module.scss'
 import Button from './components/Button'
 import MessageBox from './MessageBox'
@@ -6,13 +7,20 @@ import MessageBox from './MessageBox'
 import type { Message } from './types'
 
 function ChatWindow() {
+  const { setApiKeyHint, setShowModal } = useContext(SettingsModalContext)
   const [text, setText] = useState('')
   const [messages, setMessages] = useState<Message[]>([])
   const isEnterKeyDown = useRef(false)
 
   const handleSendMessage = () => {
-    setText('')
+    if (!text.length) return
+    if (!localStorage.getItem('api-key')) {
+      setApiKeyHint('Set up your API key to use the app.')
+      setShowModal(true)
+      return
+    }
     setMessages((messages) => [...messages, { role: 'user', content: text }])
+    setText('')
   }
 
   return (

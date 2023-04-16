@@ -1,7 +1,9 @@
 import { useCallback, useState } from 'react'
+import { ToastProvider } from './components/Toast'
 import ChatWindow from './ChatWindow'
 import Sidebar from './Sidebar'
 import Button from './components/Button'
+import { SettingsModalProvider } from './SettingsModal'
 
 import classes from './index.module.scss'
 
@@ -18,19 +20,23 @@ function Amadeus() {
 
   return (
     <div id='amadeus' className={classes.amadeus}>
-      {showSidebar && <Sidebar onClose={hideSideBar} />}
-      <ChatWindow />
-      {!showSidebar && (
-        <Button
-          className={classes.settingsButton}
-          onClick={() => {
-            setShowSideBar(true)
-            localStorage.setItem(SHOW_SIDEBAR, '1')
-          }}
-        >
-          Menu
-        </Button>
-      )}
+      <ToastProvider>
+        <SettingsModalProvider>
+          {showSidebar && <Sidebar onClose={hideSideBar} />}
+          <ChatWindow />
+          {!showSidebar && (
+            <Button
+              className={classes.settingsButton}
+              onClick={() => {
+                setShowSideBar(true)
+                localStorage.setItem(SHOW_SIDEBAR, '1')
+              }}
+            >
+              Menu
+            </Button>
+          )}
+        </SettingsModalProvider>
+      </ToastProvider>
     </div>
   )
 }

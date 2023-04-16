@@ -1,8 +1,8 @@
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useContext } from 'react'
+import { SettingsModalContext } from './SettingsModal'
 
 import { AiOutlineDoubleLeft, AiOutlineSetting } from 'react-icons/ai'
 import DoubleIcon from './components/DoubleIcon'
-import SettingsModal from './SettingsModal'
 
 import classes from './Sidebar.module.scss'
 
@@ -35,9 +35,9 @@ const MenuItem = React.memo(Item)
 type Props = { onClose: () => void }
 
 function Sidebar(props: Props) {
-  const [isOpen, setIsOpen] = useState(false)
+  const { setShowModal } = useContext(SettingsModalContext)
   const openModal = useCallback(() => {
-    setIsOpen(true)
+    setShowModal(true)
   }, [])
 
   return (
@@ -51,12 +51,6 @@ function Sidebar(props: Props) {
           onClick={props.onClose}
         />
       </div>
-      <SettingsModal
-        isOpen={isOpen}
-        onClose={() => {
-          setIsOpen(false)
-        }}
-      />
     </div>
   )
 }
