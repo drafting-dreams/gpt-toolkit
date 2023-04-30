@@ -7,8 +7,11 @@ import {
   useState,
 } from 'react'
 import { createPortal } from 'react-dom'
+
 import { ToastContext } from './components/Toast'
 import Button from './components/Button'
+
+import { LOCALSTORAGE_API_KEY } from '../constants'
 import classes from './SettingsModal.module.scss'
 
 import type { Dispatch, HTMLProps, SetStateAction } from 'react'
@@ -31,7 +34,6 @@ export const SettingsModalContext = createContext<{
   setApiKeyHint: Dispatch<SetStateAction<string>>
   setShowModal: Dispatch<SetStateAction<boolean>>
 }>({ showModal: false, setApiKeyHint: () => {}, setShowModal: () => {} })
-const API_KEY_LOCALSTORAGE_KEY = 'api-key'
 export const SettingsModalProvider = (props: PropsWithChildren) => {
   const [showModal, setShowModal] = useState(false)
   const [apiKey, setApiKey] = useState('')
@@ -39,7 +41,7 @@ export const SettingsModalProvider = (props: PropsWithChildren) => {
   const { setContent } = useContext(ToastContext)
   const handleSave = () => {
     const trimmedKey = apiKey.trim()
-    localStorage.setItem(API_KEY_LOCALSTORAGE_KEY, trimmedKey)
+    localStorage.setItem(LOCALSTORAGE_API_KEY, trimmedKey)
     setShowModal(false)
     setContent('Api Key is saved!')
   }
@@ -50,7 +52,7 @@ export const SettingsModalProvider = (props: PropsWithChildren) => {
 
   useEffect(() => {
     if (showModal) {
-      setApiKey(localStorage.getItem(API_KEY_LOCALSTORAGE_KEY) ?? '')
+      setApiKey(localStorage.getItem(LOCALSTORAGE_API_KEY) ?? '')
     }
   }, [showModal])
 
