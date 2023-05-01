@@ -1,22 +1,35 @@
 @import './mixins.scss';
 
-.window {
-  overflow: auto;
-  flex-grow: 1;
-}
-
-.container {
+@mixin horizontal-width-margin {
   margin: 0 auto;
-  min-height: 100vh;
-  position: relative;
   width: 860px;
 }
 
+.window {
+  flex-grow: 1;
+  position: relative;
+}
+
+.scrollContainer {
+  overflow: auto;
+  flex-shrink: 0;
+  height: 100vh;
+  padding-bottom: 60px;
+}
+
+.content {
+  @include horizontal-width-margin;
+  flex-shrink: 0;
+}
+
 .inputRow {
+  @include horizontal-width-margin;
+  background-color: black;
+  padding-bottom: 20px;
   position: absolute;
-  bottom: 20px;
-  left: 0;
-  width: 100%;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
   align-items: center;
   flex-direction: row;
   textarea {
@@ -35,10 +48,21 @@
     font-size: 14px;
   }
   .button {
-    border-radius: 14px;
+    border-radius: 15px;
     margin-left: 8px;
     padding-bottom: 6px;
     padding-top: 6px;
+  }
+
+  &::before {
+    content: '';
+    background: linear-gradient(to top, black, transparent);
+    height: 15px;
+    left: 0;
+    position: absolute;
+    top: -15px;
+    width: 100%;
+    z-index: -1;
   }
 }
 

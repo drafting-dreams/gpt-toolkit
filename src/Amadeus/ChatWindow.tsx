@@ -32,7 +32,7 @@ function ChatWindow() {
   const [messages, setMessages] = useState<Message[]>([])
   const isEnterKeyDown = useRef(false)
   const [apiStatus, setApiStatus] = useState(API_STATUS.IDLE)
-  const abortController = useRef(new AbortController())
+  const abortController = useRef<null | AbortController>(null)
 
   const handleSendMessage = () => {
     if (!text.length || apiStatus !== API_STATUS.IDLE) return
@@ -57,6 +57,7 @@ function ChatWindow() {
     if (messages.length && messages[messages.length - 1].role === 'user') {
       setApiStatus(API_STATUS.WAITING)
       setMessages([...messages, { role: 'assistant', content: <ChatLoader /> }])
+      abortController.current = new AbortController()
       completeChat(messages, completeCallback, abortController.current).finally(
         () => {
           setApiStatus(API_STATUS.IDLE)
@@ -67,55 +68,57 @@ function ChatWindow() {
 
   return (
     <div className={classes.window}>
-      <div className={classes.container}>
-        {messages.map((message, index) => (
-          <MessageBox
-            key={index}
-            isBot={message.role !== 'user'}
-            message={message.content}
-          />
-        ))}
-        <div className={classes.inputRow}>
-          <textarea
-            rows={1}
-            value={text}
-            onChange={(e) => {
-              if (isEnterKeyDown.current) return
-              setText(e.currentTarget.value)
-            }}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                isEnterKeyDown.current = true
-                if (e.altKey) {
-                  setText((text) => `${text}\n`)
-                } else {
-                  handleSendMessage()
-                }
-              }
-            }}
-            onKeyUp={(e) => {
-              if (e.key === 'Enter') {
-                isEnterKeyDown.current = false
-              }
-            }}
-          />
-          <Button
-            className={classes.button}
-            disabled={text.length === 0 || apiStatus !== API_STATUS.IDLE}
-            onClick={handleSendMessage}
-          >
-            Send
-          </Button>
-          <Button
-            className={classes.button}
-            onClick={() => {
-              abortController.current.abort()
-              setMessages([])
-            }}
-          >
-            Reset
-          </Button>
+      <div className={classes.scrollContainer}>
+        <div className={classes.content}>
+          {messages.map((message, index) => (
+            <MessageBox
+              key={index}
+              isBot={message.role !== 'user'}
+              message={message.content}
+            />
+          ))}
         </div>
+      </div>
+      <div className={classes.inputRow}>
+        <textarea
+          rows={1}
+          value={text}
+          onChange={(e) => {
+            if (isEnterKeyDown.current) return
+            setText(e.currentTarget.value)
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              isEnterKeyDown.current = true
+              if (e.altKey) {
+                setText((text) => `${text}\n`)
+              } else {
+                handleSendMessage()
+              }
+            }
+          }}
+          onKeyUp={(e) => {
+            if (e.key === 'Enter') {
+              isEnterKeyDown.current = false
+            }
+          }}
+        />
+        <Button
+          className={classes.button}
+          disabled={text.length === 0 || apiStatus !== API_STATUS.IDLE}
+          onClick={handleSendMessage}
+        >
+          Send
+        </Button>
+        <Button
+          className={classes.button}
+          onClick={() => {
+            abortController.current?.abort()
+            setMessages([])
+          }}
+        >
+          Reset
+        </Button>
       </div>
     </div>
   )
