@@ -7,6 +7,7 @@ import type { Message } from './types'
 export function completeChat(
   messages: Message[],
   callback: (content: string) => void,
+  controller: AbortController,
 ) {
   const apiKey = localStorage.getItem(LOCALSTORAGE_API_KEY)
   return axios.post(
@@ -18,6 +19,7 @@ export function completeChat(
         if (typeof progress.event?.currentTarget?.responseText === 'string')
           callback(progress.event.currentTarget.responseText)
       },
+      signal: controller.signal,
     },
   )
 }

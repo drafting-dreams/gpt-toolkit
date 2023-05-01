@@ -9,14 +9,33 @@ import { LOCALSTORAGE_API_KEY } from '../constants'
 
 import type { Message } from './types'
 
+enum API_STATUS {
+  IDLE,
+  WAITING,
+  GENERATING,
+}
+
+function ChatLoader() {
+  return (
+    <div className={classes.loader}>
+      <div></div>
+      <div></div>
+      <div></div>
+      <div></div>
+    </div>
+  )
+}
+
 function ChatWindow() {
   const { setApiKeyHint, setShowModal } = useContext(SettingsModalContext)
   const [text, setText] = useState('')
   const [messages, setMessages] = useState<Message[]>([])
   const isEnterKeyDown = useRef(false)
+  const [apiStatus, setApiStatus] = useState(API_STATUS.IDLE)
+  const abortController = useRef(new AbortController())
 
   const handleSendMessage = () => {
-    if (!text.length) return
+    if (!text.length || apiStatus !== API_STATUS.IDLE) return
     if (!localStorage.getItem(LOCALSTORAGE_API_KEY)) {
       setApiKeyHint('Set up your API key to use the app.')
       setShowModal(true)
@@ -28,17 +47,21 @@ function ChatWindow() {
 
   const completeCallback = (content: string) => {
     const lastMessage = { role: 'assistant' as const, content }
-    setMessages((messages) => {
-      if (messages[messages.length - 1].role !== 'assistant') {
-        return [...messages, lastMessage]
-      }
-      return [...messages.slice(0, messages.length - 1), lastMessage]
-    })
+    setMessages((messages) => [
+      ...messages.slice(0, messages.length - 1),
+      lastMessage,
+    ])
   }
 
   useEffect(() => {
     if (messages.length && messages[messages.length - 1].role === 'user') {
-      completeChat(messages, completeCallback)
+      setApiStatus(API_STATUS.WAITING)
+      setMessages([...messages, { role: 'assistant', content: <ChatLoader /> }])
+      completeChat(messages, completeCallback, abortController.current).finally(
+        () => {
+          setApiStatus(API_STATUS.IDLE)
+        },
+      )
     }
   }, [messages])
 
@@ -76,12 +99,17 @@ function ChatWindow() {
               }
             }}
           />
-          <Button className={classes.button} onClick={handleSendMessage}>
+          <Button
+            className={classes.button}
+            disabled={text.length === 0 || apiStatus !== API_STATUS.IDLE}
+            onClick={handleSendMessage}
+          >
             Send
           </Button>
           <Button
             className={classes.button}
             onClick={() => {
+              abortController.current.abort()
               setMessages([])
             }}
           >

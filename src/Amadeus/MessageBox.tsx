@@ -1,10 +1,13 @@
 import React from 'react'
+import Markdown from 'react-markdown'
 import cx from 'classnames'
 import classes from './MessageBox.module.scss'
 import rintaroAvatar from './assets/rintaro.webp'
 import kurisuAvatar from './assets/kurisu.png'
 
-type Props = { message: string; isBot: boolean }
+import type { ReactNode } from 'react'
+
+type Props = { message: ReactNode; isBot: boolean }
 
 function MessageBox({ message, isBot }: Props) {
   return (
@@ -14,12 +17,16 @@ function MessageBox({ message, isBot }: Props) {
         src={kurisuAvatar}
       />
       <div
-        className={cx(classes.message, {
+        className={cx({
           [classes.textAlignLeft]: isBot,
           [classes.textAlignRight]: !isBot,
         })}
       >
-        {message}
+        {typeof message === 'string' ? (
+          <Markdown includeElementIndex>{message}</Markdown>
+        ) : (
+          message
+        )}
       </div>
       <img
         className={cx(classes.rintaroAvatar, { [classes.hidden]: isBot })}
