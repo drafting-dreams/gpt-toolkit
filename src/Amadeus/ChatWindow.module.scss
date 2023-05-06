@@ -1,3 +1,4 @@
+@import './colors.scss';
 @import './mixins.scss';
 
 @mixin horizontal-width-margin {
@@ -15,6 +16,16 @@
   flex-shrink: 0;
   height: 100vh;
   padding-bottom: 60px;
+  &::-webkit-scrollbar {
+    width: 12px;
+  }
+  &::-webkit-scrollbar-thumb {
+    border: 1px solid rgba(188, 26, 29, 0.5);
+    border-radius: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
 }
 
 .content {
