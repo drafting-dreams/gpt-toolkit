@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef, useState } from 'react'
+import { useCallback, useContext, useEffect, useRef, useState } from 'react'
 import { SettingsModalContext } from './SettingsModal'
 import classes from './ChatWindow.module.scss'
 import Button from './components/Button'
@@ -33,6 +33,27 @@ function ChatWindow() {
   const isEnterKeyDown = useRef(false)
   const [apiStatus, setApiStatus] = useState(API_STATUS.IDLE)
   const abortController = useRef<null | AbortController>(null)
+  const scrollContainer = useRef<HTMLDivElement>(null)
+  const contentElement = useRef<HTMLDivElement | null>(null)
+  const lastContentElementHeight = useRef(0)
+  const hasReceivedTheFirstPiece = useRef(false)
+  const userHasScrolledAfterReceivingTheFirstPiece = useRef(false)
+
+  const scrollToBottom = () => {
+    scrollContainer.current?.scrollTo({
+      behavior: 'smooth',
+      top: scrollContainer.current.scrollHeight,
+    })
+  }
+
+  const handleScroll = useCallback(() => {
+    if (
+      hasReceivedTheFirstPiece.current &&
+      !userHasScrolledAfterReceivingTheFirstPiece.current
+    ) {
+      userHasScrolledAfterReceivingTheFirstPiece.current = true
+    }
+  }, [])
 
   const handleSendMessage = () => {
     if (!text.length || apiStatus !== API_STATUS.IDLE) return
@@ -54,26 +75,71 @@ function ChatWindow() {
   }
 
   useEffect(() => {
-    if (messages.length && messages[messages.length - 1].role === 'user') {
-      setApiStatus(API_STATUS.WAITING)
-      setMessages([...messages, { role: 'assistant', content: <ChatLoader /> }])
-      abortController.current = new AbortController()
-      completeChat(messages, completeCallback, abortController.current).finally(
-        () => {
+    if (messages.length) {
+      const lastMessage = messages[messages.length - 1]
+
+      // Send the network request when user sends a message
+      if (messages.length && lastMessage.role === 'user') {
+        setApiStatus(API_STATUS.WAITING)
+        setMessages([
+          ...messages,
+          { role: 'assistant', content: <ChatLoader /> },
+        ])
+        abortController.current = new AbortController()
+        completeChat(
+          messages,
+          completeCallback,
+          abortController.current,
+        ).finally(() => {
           setApiStatus(API_STATUS.IDLE)
-        },
-      )
+          hasReceivedTheFirstPiece.current = false
+        })
+      }
+
+      // Scroll to bottom when user just sends a message
+      if (
+        lastMessage.role === 'assistant' &&
+        lastMessage.content !== 'string'
+      ) {
+        scrollToBottom()
+      }
+
+      // Scroll to bottom when receives the first piece of response
+      // Scroll to bottom if user hasn't scrolled  after receiving the response or
+      // if the distance to bottom is smaller than 30px, if user has scrolled
+      // When the last message's height has increased
+      if (
+        lastMessage.role === 'assistant' &&
+        lastMessage.content === 'string' &&
+        (!hasReceivedTheFirstPiece.current ||
+          !userHasScrolledAfterReceivingTheFirstPiece.current ||
+          (contentElement.current?.offsetHeight !==
+            lastContentElementHeight.current &&
+            scrollContainer.current &&
+            scrollContainer.current.scrollHeight -
+              scrollContainer.current.offsetHeight <
+              scrollContainer.current.scrollTop + 20))
+      ) {
+        hasReceivedTheFirstPiece.current = true
+        lastContentElementHeight.current =
+          contentElement.current?.offsetHeight ?? 0
+        scrollToBottom()
+      }
     }
   }, [messages])
 
   return (
     <div className={classes.window}>
-      <div className={classes.scrollContainer}>
-        <div className={classes.content}>
+      <div
+        className={classes.scrollContainer}
+        onScroll={handleScroll}
+        ref={scrollContainer}
+      >
+        <div className={classes.content} ref={contentElement}>
           {messages.map((message, index) => (
             <MessageBox
               key={index}
-              isBot={message.role !== 'user'}
+              isBot={message.role === 'assistant'}
               message={message.content}
             />
           ))}
