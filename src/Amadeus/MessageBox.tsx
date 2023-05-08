@@ -17,7 +17,7 @@ function MessageBox({ message, isBot }: Props) {
         src={kurisuAvatar}
       />
       <div
-        className={cx({
+        className={cx(classes.message, {
           [classes.textAlignLeft]: isBot,
           [classes.textAlignRight]: !isBot,
         })}
