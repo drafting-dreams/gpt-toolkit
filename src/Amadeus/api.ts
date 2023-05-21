@@ -6,13 +6,14 @@ import type { Message } from './types'
 
 export function completeChat(
   messages: Message[],
+  context: string,
   callback: (content: string) => void,
   controller: AbortController,
 ) {
   const apiKey = localStorage.getItem(LOCALSTORAGE_API_KEY)
   return axios.post(
     '/api/chat',
-    { apiKey, messages },
+    context ? { apiKey, context, messages } : { apiKey, messages },
     {
       responseType: 'stream',
       onDownloadProgress: (progress) => {

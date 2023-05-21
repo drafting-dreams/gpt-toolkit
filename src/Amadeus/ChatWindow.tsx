@@ -38,6 +38,9 @@ function ChatWindow() {
   const lastContentElementHeight = useRef(0)
   const hasReceivedTheFirstPiece = useRef(false)
   const userHasScrolledAfterReceivingTheFirstPiece = useRef(false)
+  const dialogContext = useRef('')
+  const contextRangeIndex = useRef(0)
+  const responseOffset = useRef(0)
 
   const scrollToBottom = () => {
     scrollContainer.current?.scrollTo({
@@ -67,7 +70,22 @@ function ChatWindow() {
   }
 
   const completeCallback = (content: string) => {
-    const lastMessage = { role: 'assistant' as const, content }
+    const startMark = '-----Context Start-----'
+    const endMark = '-----Context End-----'
+    if (content.startsWith(startMark)) {
+      const endIndex = content.indexOf(endMark)
+      dialogContext.current = content.substring(startMark.length, endIndex)
+      // The last message's index that the context includes. The server will summarize a context if the dialog is too long.
+      // This index is an right open interval of the message range, which means `messages.length - 1` is actually not included in the context returned.
+      contextRangeIndex.current = messages.length - 1
+      responseOffset.current = endIndex + endMark.length
+    }
+    const lastMessage = {
+      role: 'assistant' as const,
+      content: responseOffset.current
+        ? content.substring(responseOffset.current)
+        : content,
+    }
     setMessages((messages) => [
       ...messages.slice(0, messages.length - 1),
       lastMessage,
@@ -87,12 +105,14 @@ function ChatWindow() {
         ])
         abortController.current = new AbortController()
         completeChat(
-          messages,
+          messages.slice(contextRangeIndex.current),
+          dialogContext.current,
           completeCallback,
           abortController.current,
         ).finally(() => {
           setApiStatus(API_STATUS.IDLE)
           hasReceivedTheFirstPiece.current = false
+          responseOffset.current = 0
         })
       }
 
@@ -179,6 +199,7 @@ function ChatWindow() {
         <Button
           className={classes.button}
           onClick={() => {
+            dialogContext.current = ''
             abortController.current?.abort()
             setMessages([])
           }}
