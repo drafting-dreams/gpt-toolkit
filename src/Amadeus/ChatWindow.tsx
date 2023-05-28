@@ -41,6 +41,7 @@ function ChatWindow() {
   const dialogContext = useRef('')
   const contextRangeIndex = useRef(0)
   const responseOffset = useRef(0)
+  const isImeMode = useRef(false)
 
   const scrollToBottom = () => {
     scrollContainer.current?.scrollTo({
@@ -174,6 +175,8 @@ function ChatWindow() {
             setText(e.currentTarget.value)
           }}
           onKeyDown={(e) => {
+            if (isImeMode.current) return
+
             if (e.key === 'Enter') {
               isEnterKeyDown.current = true
               if (e.altKey) {
@@ -187,6 +190,12 @@ function ChatWindow() {
             if (e.key === 'Enter') {
               isEnterKeyDown.current = false
             }
+          }}
+          onCompositionStart={() => {
+            isImeMode.current = true
+          }}
+          onCompositionEnd={() => {
+            isImeMode.current = false
           }}
         />
         <Button
