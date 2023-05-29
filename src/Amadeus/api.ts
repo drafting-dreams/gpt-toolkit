@@ -17,7 +17,10 @@ export function completeChat(
     {
       responseType: 'stream',
       onDownloadProgress: (progress) => {
-        if (typeof progress.event?.currentTarget?.responseText === 'string')
+        if (
+          progress.event?.currentTarget?.status === 201 &&
+          typeof progress.event?.currentTarget?.responseText === 'string'
+        )
           callback(progress.event.currentTarget.responseText)
       },
       signal: controller.signal,

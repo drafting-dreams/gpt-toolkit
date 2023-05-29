@@ -1,5 +1,8 @@
-import React from 'react'
+import React, { useState } from 'react'
 import Markdown from 'react-markdown'
+import DoubleIcon from './components/DoubleIcon'
+import { MdErrorOutline } from 'react-icons/md'
+
 import cx from 'classnames'
 import classes from './MessageBox.module.scss'
 import rintaroAvatar from './assets/rintaro.webp'
@@ -7,9 +10,16 @@ import kurisuAvatar from './assets/kurisu.png'
 
 import type { ReactNode } from 'react'
 
-type Props = { message: ReactNode; isBot: boolean }
+type Props = {
+  message: ReactNode
+  isBot: boolean
+  showError: boolean
+  resend?: () => void
+}
 
-function MessageBox({ message, isBot }: Props) {
+function MessageBox({ message, isBot, showError, resend }: Props) {
+  const [showTooltip, setShowTooltip] = useState(false)
+
   return (
     <div className={classes.messageBox}>
       <img
@@ -26,6 +36,32 @@ function MessageBox({ message, isBot }: Props) {
           <Markdown includeElementIndex>{message}</Markdown>
         ) : (
           message
+        )}
+        {showError && (
+          <div
+            className={cx(classes.errorIconContainer, {
+              [classes.nonClickable]: !resend,
+            })}
+            onClick={() => {
+              if (resend) {
+                resend()
+                setShowTooltip(false)
+              }
+            }}
+            onMouseEnter={() => {
+              setShowTooltip(true)
+            }}
+            onMouseLeave={() => {
+              setShowTooltip(false)
+            }}
+          >
+            <DoubleIcon Icon={MdErrorOutline} />
+            {showTooltip && (
+              <div className={classes.tooltip}>{`Message not sent${
+                resend ? ',\nClick to resend.' : ''
+              }`}</div>
+            )}
+          </div>
         )}
       </div>
       <img

@@ -1,4 +1,5 @@
 import { useCallback, useContext, useEffect, useRef, useState } from 'react'
+import { ToastContext } from './components/Toast'
 import { SettingsModalContext } from './SettingsModal'
 import classes from './ChatWindow.module.scss'
 import Button from './components/Button'
@@ -26,10 +27,13 @@ function ChatLoader() {
   )
 }
 
+type UiMessage = Message & { isNotSent?: boolean }
+
 function ChatWindow() {
+  const { setContent: setToast } = useContext(ToastContext)
   const { setApiKeyHint, setShowModal } = useContext(SettingsModalContext)
   const [text, setText] = useState('')
-  const [messages, setMessages] = useState<Message[]>([])
+  const [messages, setMessages] = useState<UiMessage[]>([])
   const isEnterKeyDown = useRef(false)
   const [apiStatus, setApiStatus] = useState(API_STATUS.IDLE)
   const abortController = useRef<null | AbortController>(null)
@@ -98,23 +102,51 @@ function ChatWindow() {
       const lastMessage = messages[messages.length - 1]
 
       // Send the network request when user sends a message
-      if (messages.length && lastMessage.role === 'user') {
+      if (
+        messages.length &&
+        lastMessage.role === 'user' &&
+        !lastMessage.isNotSent
+      ) {
         setApiStatus(API_STATUS.WAITING)
         setMessages([
           ...messages,
           { role: 'assistant', content: <ChatLoader /> },
         ])
         abortController.current = new AbortController()
+        const setMessageNotSent = (messages: UiMessage[]) => [
+          ...messages.slice(0, messages.length - 2),
+          { ...messages[messages.length - 2], isNotSent: true },
+        ]
         completeChat(
-          messages.slice(contextRangeIndex.current),
+          messages
+            .slice(contextRangeIndex.current)
+            .filter((message) => !message.isNotSent),
           dialogContext.current,
           completeCallback,
           abortController.current,
-        ).finally(() => {
-          setApiStatus(API_STATUS.IDLE)
-          hasReceivedTheFirstPiece.current = false
-          responseOffset.current = 0
-        })
+        )
+          .then(undefined, (axiosError) => {
+            try {
+              const error = JSON.parse(axiosError.response.data)
+
+              if (error.errorCode === 2) {
+                setMessages(setMessageNotSent)
+                setApiKeyHint(error.message)
+                setShowModal(true)
+              } else if (error.errorCode) {
+                setMessages(setMessageNotSent)
+                setToast(error.message)
+              }
+            } catch (error: any) {
+              setMessages(setMessageNotSent)
+              setToast(error.toString())
+            }
+          })
+          .finally(() => {
+            setApiStatus(API_STATUS.IDLE)
+            hasReceivedTheFirstPiece.current = false
+            responseOffset.current = 0
+          })
       }
 
       // Scroll to bottom when user just sends a message
@@ -162,6 +194,20 @@ function ChatWindow() {
               key={index}
               isBot={message.role === 'assistant'}
               message={message.content}
+              showError={!!message.isNotSent}
+              resend={
+                index === messages.length - 1
+                  ? () => {
+                      setMessages([
+                        ...messages.slice(0, messages.length - 1),
+                        {
+                          role: 'user',
+                          content: messages[messages.length - 1].content,
+                        },
+                      ])
+                    }
+                  : undefined
+              }
             />
           ))}
         </div>

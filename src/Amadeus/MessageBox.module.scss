@@ -1,3 +1,5 @@
+@import './mixins.scss';
+
 .messageBox {
   padding: 12px 0;
   flex-direction: row;
@@ -22,6 +24,7 @@
 
 .message {
   padding: 8px 0;
+  position: relative;
 }
 .textAlignLeft {
   margin-right: auto;
@@ -35,4 +38,25 @@
 }
 .rintaroAvatar {
   margin-left: 20px;
+}
+
+.errorIconContainer {
+  cursor: pointer;
+
+  position: absolute;
+  top: 50%;
+  transform: translate(-150%, -45%);
+
+  .tooltip {
+    @include border-color-inactive;
+    font-size: 12px;
+    padding: 0 4px;
+    padding-bottom: 1px;
+    position: absolute;
+    transform: translate(calc(-100% - 10px), -1px);
+    white-space: pre;
+  }
+}
+.nonClickable {
+  cursor: auto;
 }
