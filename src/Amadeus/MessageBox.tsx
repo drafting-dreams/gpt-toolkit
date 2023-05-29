@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import Markdown from 'react-markdown'
 import DoubleIcon from './components/DoubleIcon'
 import { MdErrorOutline } from 'react-icons/md'
 
@@ -32,11 +31,7 @@ function MessageBox({ message, isBot, showError, resend }: Props) {
           [classes.textAlignRight]: !isBot,
         })}
       >
-        {typeof message === 'string' ? (
-          <Markdown includeElementIndex>{message}</Markdown>
-        ) : (
-          message
-        )}
+        {message}
         {showError && (
           <div
             className={cx(classes.errorIconContainer, {
